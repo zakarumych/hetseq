@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 /// Substitution for Fn* traits family in stable and beta channels
 /// In nightly consider to use "nightly" feature and Fn* traits family
 /// Lambdas doesn't work with heterogenous sequences

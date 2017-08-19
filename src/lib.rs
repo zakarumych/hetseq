@@ -1,5 +1,6 @@
 #![cfg_attr(feature="nightly", feature(unsize, fn_traits, unboxed_closures))]
 
+#[macro_export]
 macro_rules! hlist {
     () => {
         List::new()
@@ -9,6 +10,7 @@ macro_rules! hlist {
     };
 }
 
+#[macro_export]
 macro_rules! hqueue {
     ($($values:expr),*) => {
         Queue::new()$(.push($values))*
