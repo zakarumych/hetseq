@@ -3,8 +3,31 @@ use {List, Queue};
 #[cfg(not(feature="nightly"))]
 use F as Fn;
 
+/// Functor over heterogenous list
+///
+/// # Example
+/// ```rust
+/// #![cfg_attr(feature="nightly", feature(unsize, fn_traits, unboxed_closures))]
+/// #[macro_use]
+/// extern crate hetseq;
+/// 
+/// use hetseq::{Functor, Queue};
+/// #[cfg(not(feature="nightly"))]
+/// use hetseq::F;
+/// 
+/// use std::fmt::Display;
+/// lambda![ let Formatter = |const arg: Display| -> String { format!("{}", arg) } ];
+/// fn main() {
+///     let queue = hqueue![1, 2.5];
+///     let strings = queue.fmap(&Formatter);
+///     assert_eq!(strings, hqueue!["1".to_owned(), "2.5".to_owned()]);
+/// }
+/// ```
 pub trait Functor<F> {
+    /// Result of mapping
     type Output;
+
+    /// Map sequence using `F`unction
     fn fmap(self, F) -> Self::Output;
 }
 

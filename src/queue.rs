@@ -1,4 +1,7 @@
 
+/// Heterogenous queue
+/// Supports pushing, splitting to init and last
+/// Mapping and folding
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Eq, Ord)]
 pub struct Queue<Q>(pub Q);
 
@@ -15,10 +18,10 @@ impl<Q> Queue<Q> {
 }
 
 impl<H, T> Queue<(Queue<H>, T)> {
-    pub fn head(&self) -> &Queue<H> {
+    pub fn init(&self) -> &Queue<H> {
         &(self.0).0
     }
-    pub fn tail(&self) -> &T {
+    pub fn last(&self) -> &T {
         &(self.0).1
     }
 }

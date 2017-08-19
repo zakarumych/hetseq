@@ -1,4 +1,8 @@
 
+
+/// Heterogenous list
+/// Supports pushing, splitting to head and tail
+/// Mapping and folding
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Eq, Ord)]
 pub struct List<L>(pub L);
 impl List<()> {

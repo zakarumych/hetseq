@@ -1,5 +1,5 @@
 
-use {Fold, Functor, List, Queue};
+use {Foldable, Functor, List, Queue};
 #[cfg(feature="nightly")]
 use IntoRefIter;
 #[cfg(feature="nightly")]
@@ -10,30 +10,20 @@ mod functions {
 use std::fmt::Display;
 use F;
 
-#[derive(Clone, Copy)]
-pub struct Formatter;
-impl<A: Display> F<(A,)> for Formatter {
-    type Output = String;
-    fn call(&self, (arg,): (A,)) -> String {
+lambda!{
+    let Formatter = |const arg: Display| -> String {
         format!("{}", arg)
     }
 }
 
-#[derive(Clone, Copy)]
-pub struct Extender;
-impl<I, E> F<(I, E)> for Extender
-    where E: Extend<I>
-{
-    type Output = E;
-    fn call(&self, (item, mut extend): (I, E)) -> E {
+lambda!{
+    let Extender = |const item, mut extend: Extend<item>| -> extend {
         extend.extend(::std::iter::once(item));
         extend
     }
 }
 
 }
-
-
 
 #[cfg(feature="nightly")]
 mod functions {

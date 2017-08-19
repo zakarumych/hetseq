@@ -1,14 +1,26 @@
 use std::marker::PhantomData;
 
+/// Type level zero value
 pub enum Z {}
+
+/// Type level +1
 pub struct S<N: Num>(PhantomData<N>);
+
+/// Type level -1
 pub struct P<N: Num>(PhantomData<N>);
 
+/// Type level number
 pub trait Num {
+    /// Next number
     type S: Num;
+
+    /// Previous number
     type P: Num;
+
+    /// Convert to value level
     fn value() -> usize;
 }
+
 impl Num for Z {
     type S = S<Z>;
     type P = P<Z>;
