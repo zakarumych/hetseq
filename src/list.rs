@@ -1,4 +1,4 @@
-
+use {IntoQueue, Queue};
 
 /// Heterogenous list
 /// Supports pushing, splitting to head and tail
@@ -25,5 +25,43 @@ impl<H, T> List<(H, List<T>)> {
     pub fn tail(&self) -> &List<T> {
         let List((_, ref tail)) = *self;
         tail
+    }
+}
+
+pub trait IntoList {
+    ///
+    type List;
+    ///
+    fn into_list(self) -> Self::List;
+}
+
+impl<L> IntoList for List<L> {
+    type List = Self;
+    fn into_list(self) -> Self { self }
+}
+
+pub trait IntoQueueImpl<L> {
+    type Queue;
+    fn into_queue_impl(self, L) -> Self::Queue;
+}
+
+impl<H, T, L> IntoQueueImpl<Queue<L>> for List<(H, T)>
+    where T: IntoQueueImpl<Queue<(Queue<L>, H)>>
+{
+    type Queue = T::Queue;
+
+    fn into_queue_impl(self, queue: Queue<L>) -> Self::Queue {
+        let List((head, tail)) = self;
+        let queue = queue.push(head);
+        tail.into_queue_impl(queue)
+    }
+}
+
+impl<Q> IntoQueue for Q
+    where Q: IntoQueueImpl<Queue<()>>
+{
+    type Queue = <Q as IntoQueueImpl<Queue<()>>>::Queue;
+    fn into_queue(self) -> Self::Queue {
+        self.into_queue_impl(Queue::new())
     }
 }

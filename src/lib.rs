@@ -124,9 +124,9 @@ mod unsize_iter;
 pub use f::{HetFnOnce, HetFnMut, HetFn};
 pub use fold::Foldable;
 pub use functor::Functor;
-pub use list::List;
+pub use list::{IntoList, List};
 pub use num::{Num, P, S, Z};
-pub use queue::Queue;
+pub use queue::{IntoQueue, Queue};
 
 #[cfg(feature="nightly")]
 pub use unsize_iter::{IntoRefIter, UnsizeRefIter, UnsizeRefIterator};
