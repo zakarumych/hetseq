@@ -114,6 +114,7 @@ mod functor;
 mod len;
 mod list;
 mod num;
+mod try;
 mod queue;
 mod zip;
 
@@ -131,6 +132,7 @@ pub use functor::Functor;
 pub use len::Length;
 pub use list::{IntoList, List};
 pub use num::{Num, P, S, Z};
+pub use try::Try;
 pub use queue::{IntoQueue, Queue};
 pub use zip::Zip;
 
