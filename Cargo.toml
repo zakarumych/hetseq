@@ -1,6 +1,6 @@
 [package]
 name = "hetseq"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["omni-viral"]
 description = "Defines traits and types to work with heterogenous sequences"
 license = "Apache-2.0/MIT"
