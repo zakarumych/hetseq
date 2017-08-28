@@ -113,6 +113,7 @@ mod functor;
 mod list;
 mod num;
 mod queue;
+mod zip;
 
 #[cfg(test)]
 mod tests;
@@ -127,6 +128,7 @@ pub use functor::Functor;
 pub use list::{IntoList, List};
 pub use num::{Num, P, S, Z};
 pub use queue::{IntoQueue, Queue};
+pub use zip::Zip;
 
 #[cfg(feature="nightly")]
 pub use unsize_iter::{IntoRefIter, UnsizeRefIter, UnsizeRefIterator};
