@@ -1,7 +1,7 @@
 use {List, Queue};
 
 #[cfg(not(feature="nightly"))]
-use F as Fn;
+use HetFnMut as FnMut;
 
 /// Functor over heterogenous list
 ///
@@ -13,10 +13,10 @@ use F as Fn;
 /// 
 /// use hetseq::{Functor, Queue};
 /// #[cfg(not(feature="nightly"))]
-/// use hetseq::F;
+/// use hetseq::prelude::*;
 /// 
 /// use std::fmt::Display;
-/// lambda![ let Formatter = |const arg: Display| -> String { format!("{}", arg) } ];
+/// lambda![ let Formatter = |arg: Display| -> String { format!("{}", arg) } ];
 /// fn main() {
 ///     let queue = hqueue![1, 2.5];
 ///     let strings = queue.fmap(&Formatter);
@@ -45,25 +45,25 @@ impl<F> Functor<F> for Queue<()> {
     }
 }
 
-impl<X, H, T, O, U> Functor<X> for List<(H, List<T>)>
-    where List<T>: Functor<X, Output=List<U>>,
-          X: Fn<(H,), Output=O>,
+impl<F, H, T, O, U> Functor<F> for List<(H, List<T>)>
+    where List<T>: Functor<F, Output=List<U>>,
+          F: FnMut<(H,), Output=O>,
 {
     type Output = List<(O, List<U>)>;
-    fn fmap(self, f: X) -> Self::Output {
+    fn fmap(self, mut f: F) -> Self::Output {
         let List((head, tail)) = self;
-        let head = f.call((head,));
+        let head = f.call_mut((head,));
         tail.fmap(f).push(head)
     }
 }
 
-impl<X, H, T, O, U> Functor<X> for Queue<(Queue<H>, T)>
-    where Queue<H>: Functor<X, Output=Queue<U>>,
-          X: Fn<(T,), Output=O> + Clone,
+impl<F, H, T, O, U> Functor<F> for Queue<(Queue<H>, T)>
+    where Queue<H>: for<'a> Functor<&'a mut F, Output=Queue<U>>,
+          F: FnMut<(T,), Output=O>,
 {
     type Output = Queue<(Queue<U>, O)>;
-    fn fmap(self, f: X) -> Self::Output {
+    fn fmap(self, mut f: F) -> Self::Output {
         let Queue((head, tail)) = self;
-        head.fmap(f.clone()).push(f.call((tail,)))
+        head.fmap(&mut f).push(f.call_mut((tail,)))
     }
 }

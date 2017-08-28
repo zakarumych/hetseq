@@ -8,16 +8,16 @@ use std::fmt::Display;
 #[cfg(not(feature="nightly"))]
 mod functions {
 use std::fmt::Display;
-use F;
+use HetFn;
 
 lambda!{
-    let Formatter = |const arg: Display| -> String {
+    let Formatter = |arg: Display| -> String {
         format!("{}", arg)
     }
 }
 
 lambda!{
-    let Extender = |const item, mut extend: Extend<item>| -> extend {
+    let Extender = |item, extend: Extend<item>| -> extend {
         extend.extend(::std::iter::once(item));
         extend
     }
@@ -29,46 +29,14 @@ lambda!{
 mod functions {
 use super::*;
 
-#[derive(Clone, Copy)]
-pub struct Formatter;
-impl<A: Display> FnOnce<(A,)> for Formatter {
-    type Output = String;
-    extern "rust-call" fn call_once(self, args: (A,)) -> String {
-        self.call(args)
-    }
-}
-impl<A: Display> FnMut<(A,)> for Formatter {
-    extern "rust-call" fn call_mut(&mut self, args: (A,)) -> String {
-        self.call(args)
-    }
-}
-impl<A: Display> Fn<(A,)> for Formatter {
-    extern "rust-call" fn call(&self, (arg,): (A,)) -> String {
+lambda!{
+    let Formatter = |arg: Display| -> String {
         format!("{}", arg)
     }
 }
 
-#[derive(Clone, Copy)]
-pub struct Extender;
-impl<I, E> FnOnce<(I, E)> for Extender
-    where E: Extend<I>
-{
-    type Output = E;
-    extern "rust-call" fn call_once(self, args: (I, E)) -> E {
-        self.call(args)
-    }
-}
-impl<I, E> FnMut<(I, E)> for Extender
-    where E: Extend<I>
-{
-    extern "rust-call" fn call_mut(&mut self, args: (I, E)) -> E {
-        self.call(args)
-    }
-}
-impl<I, E> Fn<(I, E)> for Extender
-    where E: Extend<I>
-{
-    extern "rust-call" fn call(&self, (item, mut extend): (I, E)) -> E {
+lambda!{
+    let Extender = |item, extend: Extend<item>| -> extend {
         extend.extend(::std::iter::once(item));
         extend
     }

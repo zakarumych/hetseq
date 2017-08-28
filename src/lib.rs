@@ -23,17 +23,87 @@ macro_rules! hqueue {
 /// This macro can be used to define lambdas with syntax similar to rust's lambdas
 /// Arguments are bound by traits
 /// Mainly to use with `Functor` and `Foldable`
+/// Built-in lambdas doesn't work with heterogenous sequences
+/// as they implement Fn* traits only for one parameters set
 #[cfg(not(feature="nightly"))]
 #[macro_export]
 macro_rules! lambda {
-    {let $n:ident = |$($(const $anc:ident),* $(mut $anm:ident),* $(: $at:path)*),*| -> $o:ty { $($s:stmt);* }} => {
+    {let $n:ident = |$($an:ident $(: $at:path)*),*| -> $o:ty { $($s:stmt);* }} => {
+
         #[derive(Clone, Copy)]
         #[allow(non_camel_case_types)]
         pub struct $n;
-        #[allow(non_camel_case_types)]
-        impl<$($($anc)*$($anm)*: $($at)*,)*> F<($($($anc)*$($anm)*,)*)> for $n {
+
+        #[allow(non_camel_case_types,unused_mut)]
+        impl<$($an: $($at)*,)*> $crate::HetFnOnce<($($an,)*)> for $n {
             type Output = $o;
-            fn call(&self, ($($($anc)*$(mut $anm)*,)*): ($($($anc)*$($anm)*,)*)) -> $o {
+            fn call_once(self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                Self::call(&self, ($($an,)*))
+            }
+        }
+        
+        #[allow(non_camel_case_types,unused_mut)]
+        impl<$($an: $($at)*,)*> $crate::HetFnMut<($($an,)*)> for $n {
+            fn call_mut(&mut self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                Self::call(&self, ($($an,)*))
+            }
+        }
+
+        #[allow(non_camel_case_types,unused_mut)]
+        impl<$($an: $($at)*,)*> $crate::HetFn<($($an,)*)> for $n {
+            fn call(&self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                $($s);*
+            }
+        }
+    };
+
+    {let $n:ident($($ctx:ident),+) = |$($an:ident $(: $at:path)*),*| -> $o:ty { $($s:stmt);* }} => {
+
+        #[derive(Clone, Copy)]
+        #[allow(non_camel_case_types)]
+        pub struct $n$(($($ctx),+))*;
+
+        #[allow(non_camel_case_types)]
+        impl<$($an: $($at)*,)*> $crate::HetFnOnce<($($an,)*)> for $n {
+            type Output = $o;
+            fn call_once(self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                Self::call(&self, ($($an,)*))
+            }
+        }
+        
+        #[allow(non_camel_case_types)]
+        impl<$($an: $($at)*,)*> $crate::HetFnMut<($($an,)*)> for $n {
+            fn call_mut(&mut self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                Self::call(&self, ($($an,)*))
+            }
+        }
+
+        #[allow(non_camel_case_types)]
+        impl<$($an: $($at)*,)*> $crate::HetFn<($($an,)*)> for $n {
+            fn call(&self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                $($s);*
+            }
+        }
+    };
+
+
+    {let mut $n:ident($($ctx:ident),+) = |$($an:ident $(: $at:path)*),*| -> $o:ty { $($s:stmt);* }} => {
+
+        #[derive(Clone, Copy)]
+        #[allow(non_camel_case_types)]
+        pub struct $n$(($($ctx),+))*;
+
+        #[allow(non_camel_case_types)]
+        impl<$($an: $($at)*,)*> $crate::HetFnOnce<($($an,)*)> for $n {
+            type Output = $o;
+            fn call_once(mut self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                Self::call_mut(&mut self)
+            }
+        }
+        
+        #[allow(non_camel_case_types)]
+        impl<$($an: $($at)*,)*> $crate::HetFnMut<($($an,)*)> for $n {
+            fn call_mut(&mut self, ($(mut $an,)*): ($($an,)*)) -> $o {
                 $($s);*
             }
         }
@@ -43,32 +113,87 @@ macro_rules! lambda {
 /// This macro can be used to define lambdas with syntax similar to rust's lambdas
 /// Arguments are bound by traits
 /// Mainly to use with `Functor` and `Foldable`
+/// Built-in lambdas doesn't work with heterogenous sequences
+/// as they implement Fn* traits only for one parameters set
 #[cfg(feature="nightly")]
 #[macro_export]
 macro_rules! lambda {
-    {let $n:ident = |$($(const $anc:ident),* $(mut $anm:ident),* $(: $at:path)*),*| -> $o:ty { $($s:stmt);* }} => {
+    {let $n:ident = |$($an:ident $(: $at:path)*),*| -> $o:ty { $($s:stmt);* }} => {
+
         #[derive(Clone, Copy)]
         #[allow(non_camel_case_types)]
-        pub struct $n;
+        pub struct $n$(($($ctx),+))*;
 
         #[allow(non_camel_case_types)]
-        impl<$($($anc)*$($anm)*: $($at)*,)*> FnOnce<($($($anc)*$($anm)*,)*)> for $n {
+        impl<$($an: $($at)*,)*> FnOnce<($($an,)*)> for $n {
             type Output = $o;
-            extern "rust-call" fn call_once(self, args: ($($($anc)*$($anm)*,)*)) -> $o {
-                self.call(args)
+            extern "rust-call" fn call_once(self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                Self::call(&self, ($($an,)*))
+            }
+        }
+        
+        #[allow(non_camel_case_types)]
+        impl<$($an: $($at)*,)*> FnMut<($($an,)*)> for $n {
+            extern "rust-call" fn call_mut(&mut self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                Self::call(&self, ($($an,)*))
             }
         }
 
         #[allow(non_camel_case_types)]
-        impl<$($($anc)*$($anm)*: $($at)*,)*> FnMut<($($($anc)*$($anm)*,)*)> for $n {
-            extern "rust-call" fn call_mut(&mut self, args: ($($($anc)*$($anm)*,)*)) -> $o {
-                self.call(args)
+        impl<$($an: $($at)*,)*> Fn<($($an,)*)> for $n {
+            extern "rust-call" fn call(&self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                $($s);*
+            }
+        }
+    };
+
+    {let $n:ident($($ctx:ident),+) = |$($an:ident $(: $at:path)*),*| -> $o:ty { $($s:stmt);* }} => {
+
+        #[derive(Clone, Copy)]
+        #[allow(non_camel_case_types)]
+        pub struct $n$(($($ctx),+))*;
+
+        #[allow(non_camel_case_types)]
+        impl<$($an: $($at)*,)*> FnOnce<($($an,)*)> for $n {
+            type Output = $o;
+            extern "rust-call" fn call_once(self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                Self::call(&self, ($($an,)*))
+            }
+        }
+        
+        #[allow(non_camel_case_types)]
+        impl<$($an: $($at)*,)*> FnMut<($($an,)*)> for $n {
+            extern "rust-call" fn call_mut(&mut self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                Self::call(&self, ($($an,)*))
             }
         }
 
         #[allow(non_camel_case_types)]
-        impl<$($($anc)*$($anm)*: $($at)*,)*> Fn<($($($anc)*$($anm)*,)*)> for $n {
-            extern "rust-call" fn call(&self, ($($($anc)*$(mut $anm)*,)*): ($($($anc)*$($anm)*,)*)) -> $o {
+        impl<$($an: $($at)*,)*> Fn<($($an,)*)> for $n {
+            extern "rust-call" fn call(&self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                $($s);*
+            }
+        }
+    };
+
+
+    {let mut $n:ident($($ctx:ident),+) = |$($an:ident $(: $at:path)*),*| -> $o:ty { $($s:stmt);* }} => {
+
+        #[derive(Clone, Copy)]
+        #[allow(non_camel_case_types)]
+        pub struct $n$(($($ctx),+))*;
+
+        #[allow(non_camel_case_types)]
+        impl<$($an: $($at)*,)*> FnOnce<($($an,)*)> for $n {
+            type Output = $o;
+            extern "rust-call" fn call_once(mut self, ($(mut $an,)*): ($($an,)*)) -> $o {
+                Self::call_mut(&mut self)
+            }
+        }
+        
+        #[allow(non_camel_case_types)]
+        impl<$($an: $($at)*,)*> FnMut<($($an,)*)> for $n {
+            extern "rust-call" fn call_mut(&mut self, ($(mut $an,)*): ($($an,)*)) -> $o {
                 $($s);*
             }
         }
@@ -92,7 +217,7 @@ mod tests;
 mod unsize_iter;
 
 #[cfg(not(feature="nightly"))]
-pub use f::F;
+pub use f::{HetFnOnce, HetFnMut, HetFn};
 pub use fold::Foldable;
 pub use functor::Functor;
 pub use list::List;
@@ -103,3 +228,4 @@ pub use queue::Queue;
 pub use unsize_iter::{IntoRefIter, UnsizeRefIter, UnsizeRefIterator};
 
 
+pub mod prelude;

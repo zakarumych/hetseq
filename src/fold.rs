@@ -1,7 +1,7 @@
 use {List, Queue};
 
 #[cfg(not(feature="nightly"))]
-use F as Fn;
+use HetFnMut as FnMut;
 
 /// Foldable heterogenous list
 ///
@@ -13,12 +13,12 @@ use F as Fn;
 /// 
 /// use hetseq::{Foldable, Functor, Queue};
 /// #[cfg(not(feature="nightly"))]
-/// use hetseq::F;
+/// use hetseq::prelude::*;
 /// 
 /// use std::fmt::Display;
-/// lambda![ let Formatter = |const arg: Display| -> String { format!("{}", arg) } ];
+/// lambda![ let Formatter = |arg: Display| -> String { format!("{}", arg) } ];
 /// lambda![
-///     let Extender = |const item, mut extend: Extend<item>| -> extend {
+///     let Extender = |item, extend: Extend<item>| -> extend {
 ///         extend.extend(::std::iter::once(item));
 ///         extend
 ///     }
@@ -42,23 +42,24 @@ impl<I, F> Foldable<I, F> for Queue<()> {
     fn fold(self, init: I, _: F) -> I { init }
 }
 
-impl<I, X, H, T> Foldable<I, X> for List<(H, List<T>)>
-    where List<T>: Foldable<I, X>,
-          X: Fn<(H, I), Output=I>
+impl<I, F, H, T> Foldable<I, F> for List<(H, List<T>)>
+    where List<T>: Foldable<I, F>,
+          F: FnMut<(H, I), Output=I>
 {
-    fn fold(self, init: I, f: X) -> I {
+    fn fold(self, init: I, mut f: F) -> I {
         let List((head, tail)) = self;
-        tail.fold(f.call((head, init)), f)
+        tail.fold(f.call_mut((head, init)), f)
     }
 }
 
-impl<I, X, H, T> Foldable<I, X> for Queue<(Queue<H>, T)>
-    where Queue<H>: Foldable<I, X>,
-          X: Fn<(T, I), Output=I> + Clone
+impl<I, F, H, T> Foldable<I, F> for Queue<(Queue<H>, T)>
+    where Queue<H>: for<'a> Foldable<I, &'a mut F>,
+          F: FnMut<(T, I), Output=I>
 {
-    fn fold(self, init: I, f: X) -> I {
+    fn fold(self, init: I, mut f: F) -> I {
         let Queue((head, tail)) = self;
-        f.call((tail, head.fold(init, f.clone())))
+        let head = head.fold(init, &mut f);
+        f.call_mut((tail, head))
     }
 }
 
