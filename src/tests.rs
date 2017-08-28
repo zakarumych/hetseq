@@ -8,6 +8,7 @@ use std::fmt::Display;
 #[cfg(not(feature="nightly"))]
 mod functions {
 use std::fmt::Display;
+use std::ops::Add;
 use HetFn;
 
 lambda!{
@@ -20,6 +21,12 @@ lambda!{
     let Extender = |item, extend: Extend<item>| -> extend {
         extend.extend(::std::iter::once(item));
         extend
+    }
+}
+
+lambda!{
+    let Contextual(x: Copy) = |value: Add<x>| -> value::Output {
+        value + *x
     }
 }
 
