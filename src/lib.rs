@@ -39,7 +39,7 @@ macro_rules! lambda {
                 Self::call(&self, ($($an,)*))
             }
         }
-        
+
         #[allow(non_camel_case_types,unused_mut)]
         impl<$($an: $($at)*,)*> $crate::HetFnMut<($($an,)*)> for $n {
             fn call_mut(&mut self, ($(mut $an,)*): ($($an,)*)) -> $o {
@@ -59,67 +59,48 @@ macro_rules! lambda {
 
         #[derive(Clone)]
         #[allow(non_camel_case_types)]
-        pub struct $n<'a, $($($p),+)*>(::std::marker::PhantomData<&'a ()>, $($ct),+);
+        pub struct $n<'a, $($($p: 'a),+)*>(::std::marker::PhantomData<&'a ()>, $($ct),+);
 
-        impl<'a, $($($p),+)*> $n<'a, $($($p),+)*> {
+        impl<'a, $($($p),+)*> $n<'a, $($($p),+)*>
+            where $($($p: 'a $( + $pb,)*)+)*
+        {
             pub fn new($($c: $ct)+) -> Self {
                 $n(::std::marker::PhantomData, $($c),+)
             }
         }
 
         #[allow(non_camel_case_types,unused_mut)]
-        impl<'a, $($an: $($at,)*)+ $($($p $(: $pb)*,)+)*> $crate::HetFnOnce<($($an,)*)> for $n<'a, $($($p),+)*> {
+        impl<'a, $($an,)+ $($($p,)+)*> $crate::HetFnOnce<($($an,)*)> for $n<'a, $($($p),+)*>
+            where $($($an: $at,)*)+
+                  $($($p: 'a $( + $pb,)*)+)*
+        {
             type Output = $o;
             fn call_once(self, ($(mut $an,)*): ($($an,)*)) -> $o {
                 $crate::HetFn::call(&self, ($($an,)*))
             }
         }
-        
+
         #[allow(non_camel_case_types,unused_mut)]
-        impl<'a, $($an: $($at,)*)+ $($($p $(: $pb)*,)+)*> $crate::HetFnMut<($($an,)*)> for $n<'a, $($($p),+)*> {
+        impl<'a, $($an,)+ $($($p,)+)*> $crate::HetFnMut<($($an,)*)> for $n<'a, $($($p),+)*>
+            where $($($an: $at,)*)+
+                  $($($p: 'a $( + $pb,)*)+)*
+        {
             fn call_mut(&mut self, ($(mut $an,)*): ($($an,)*)) -> $o {
                 $crate::HetFn::call(self, ($($an,)*))
             }
         }
 
         #[allow(non_camel_case_types,unused_mut)]
-        impl<'a, $($an: $($at,)*)+ $($($p $(: $pb)*,)+)*> $crate::HetFn<($($an,)*)> for $n<'a, $($($p),+)*> {
+        impl<'a, $($an,)+ $($($p,)+)*> $crate::HetFn<($($an,)*)> for $n<'a, $($($p),+)*>
+            where $($($an: $at,)*)+
+                  $($($p: 'a $( + $pb,)*)+)*
+        {
             fn call(&self, ($(mut $an,)*): ($($an,)*)) -> $o {
                 let $n(_, $(ref $c,)+) = *self;
                 $($s);*
             }
         }
     };
-
-
-    {let mut $n:ident$(<$($p:ident $(: $pb:path)*),+>)*($($c:ident: $ct:ty)+) = |$($an:ident $(: $at:path)*),+| -> $o:ty { $($s:stmt);* }} => {
-
-        #[derive(Clone)]
-        #[allow(non_camel_case_types)]
-        pub struct $n<'a, $($($p),+)*>(::std::marker::PhantomData<&'a ()>, $($ct),+);
-
-        impl<'a, $($($p),+)*> $n<'a, $($($p),+)*> {
-            pub fn new($($c: $ct)+) -> Self {
-                $n(::std::marker::PhantomData, $($c),+)
-            }
-        }
-
-        #[allow(non_camel_case_types,unused_mut)]
-        impl<'a, $($an: $($at,)*)+ $($($p $(: $pb)*,)+)*> $crate::HetFnOnce<($($an,)*)> for $n<'a, $($($p),+)*> {
-            type Output = $o;
-            fn call_once(mut self, ($(mut $an,)*): ($($an,)*)) -> $o {
-                $crate::HetFnMut::call_mut(&mut self, ($($an,)*))
-            }
-        }
-        
-        #[allow(non_camel_case_types,unused_mut)]
-        impl<'a, $($an: $($at,)*)+ $($($p $(: $pb)*,)+)*> $crate::HetFnMut<($($an,)*)> for $n<'a, $($($p),+)*> {
-            fn call_mut(&mut self, ($(mut $an,)*): ($($an,)*)) -> $o {
-                let $n(_, $(ref mut $c,)+) = *self;
-                $($s);*
-            }
-        }
-    }
 }
 
 

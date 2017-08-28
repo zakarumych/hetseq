@@ -30,6 +30,12 @@ lambda!{
     }
 }
 
+lambda!{
+    let AdderBorrowed<X: Clone>(x: &'a X) = |value: Add<X>| -> value::Output {
+        value + X::clone(x)
+    }
+}
+
 }
 
 #[cfg(feature="nightly")]
@@ -51,7 +57,7 @@ lambda!{
 
 }
 
-use self::functions::{Formatter, Extender, Adder};
+use self::functions::{Formatter, Extender, Adder, AdderBorrowed};
 
 const EXPECT: [&'static str; 3] = ["1", "2.5", "qwe"];
 
@@ -94,5 +100,10 @@ fn test_unsize_ref_iter() {
 fn text_contextual() {
     let list = hlist![2, 1];
     let list = list.fmap(Adder::new(3));
+    assert_eq!(list, hlist![5, 4]);
+
+
+    let list = hlist![2, 1];
+    let list = list.fmap(AdderBorrowed::new(&3));
     assert_eq!(list, hlist![5, 4]);
 }
