@@ -104,12 +104,14 @@ macro_rules! lambda {
 }
 
 
+mod by_ref;
 
 #[cfg(not(feature="nightly"))]
 mod f;
 
 mod fold;
 mod functor;
+mod len;
 mod list;
 mod num;
 mod queue;
@@ -121,10 +123,12 @@ mod tests;
 #[cfg(feature="nightly")]
 mod unsize_iter;
 
+pub use by_ref::ByRef;
 #[cfg(not(feature="nightly"))]
 pub use f::{HetFnOnce, HetFnMut, HetFn};
 pub use fold::Foldable;
 pub use functor::Functor;
+pub use len::Length;
 pub use list::{IntoList, List};
 pub use num::{Num, P, S, Z};
 pub use queue::{IntoQueue, Queue};

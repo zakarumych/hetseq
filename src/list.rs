@@ -6,22 +6,26 @@ use {IntoQueue, Queue};
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Eq, Ord)]
 pub struct List<L>(pub L);
 impl List<()> {
+    #[inline]
     pub fn new() -> List<()> {
         List(())
     }
 }
 
 impl<L> List<L> {
+    #[inline]
     pub fn push<V>(self, value: V) -> List<(V, List<L>)> {
         List((value, self))
     }
 }
 
 impl<H, T> List<(H, List<T>)> {
+    #[inline]
     pub fn head(&self) -> &H {
         let List((ref head, _)) = *self;
         head
     }
+    #[inline]
     pub fn tail(&self) -> &List<T> {
         let List((_, ref tail)) = *self;
         tail
