@@ -59,73 +59,73 @@ impl<'a, F> Functor<F> for &'a Queue<()> {
     }
 }
 
-impl<F, H, T, O, U> Functor<F> for List<(H, List<T>)>
-    where List<T>: Functor<F, Output=List<U>>,
+impl<F, H, T, O, U> Functor<F> for List<(H, T)>
+    where T: Functor<F, Output=U>,
           F: FnMut<(H,), Output=O>,
 {
-    type Output = List<(O, List<U>)>;
+    type Output = List<(O, U)>;
     fn fmap(self, mut f: F) -> Self::Output {
         let List((head, tail)) = self;
         let head = f.call_mut((head,));
-        tail.fmap(f).push(head)
+        List((head, tail.fmap(f)))
     }
 }
 
-impl<'a, F, H, T, O, U> Functor<F> for &'a mut List<(H, List<T>)>
-    where &'a mut List<T>: Functor<F, Output=List<U>>,
+impl<'a, F, H, T, O, U> Functor<F> for &'a mut List<(H, T)>
+    where &'a mut T: Functor<F, Output=U>,
           F: FnMut<(&'a mut H,), Output=O>,
 {
-    type Output = List<(O, List<U>)>;
+    type Output = List<(O, U)>;
     fn fmap(self, mut f: F) -> Self::Output {
         let List((ref mut head, ref mut tail)) = *self;
         let head = f.call_mut((head,));
-        tail.fmap(f).push(head)
+        List((head, tail.fmap(f)))
     }
 }
 
-impl<'a, F, H, T, O, U> Functor<F> for &'a List<(H, List<T>)>
-    where &'a List<T>: Functor<F, Output=List<U>>,
+impl<'a, F, H, T, O, U> Functor<F> for &'a List<(H, T)>
+    where &'a T: Functor<F, Output=U>,
           F: FnMut<(&'a H,), Output=O>,
 {
-    type Output = List<(O, List<U>)>;
+    type Output = List<(O, U)>;
     fn fmap(self, mut f: F) -> Self::Output {
         let List((ref head, ref tail)) = *self;
         let head = f.call_mut((head,));
-        tail.fmap(f).push(head)
+        List((head, tail.fmap(f)))
     }
 }
 
-impl<F, H, T, O, U> Functor<F> for Queue<(Queue<H>, T)>
-    where Queue<H>: for<'a> Functor<&'a mut F, Output=Queue<U>>,
+impl<F, H, T, O, U> Functor<F> for Queue<(H, T)>
+    where H: for<'a> Functor<&'a mut F, Output=U>,
           F: FnMut<(T,), Output=O>,
 {
-    type Output = Queue<(Queue<U>, O)>;
+    type Output = Queue<(U, O)>;
     fn fmap(self, mut f: F) -> Self::Output {
         let Queue((head, tail)) = self;
-        head.fmap(&mut f).push(f.call_mut((tail,)))
+        Queue((head.fmap(&mut f), f.call_mut((tail,))))
     }
 }
 
 
-impl<'a, F, H, T, O, U> Functor<F> for &'a mut Queue<(Queue<H>, T)>
-    where &'a mut Queue<H>: for<'b> Functor<&'b mut F, Output=Queue<U>>,
+impl<'a, F, H, T, O, U> Functor<F> for &'a mut Queue<(H, T)>
+    where &'a mut H: for<'b> Functor<&'b mut F, Output=U>,
           F: FnMut<(&'a mut T,), Output=O>,
 {
-    type Output = Queue<(Queue<U>, O)>;
+    type Output = Queue<(U, O)>;
     fn fmap(self, mut f: F) -> Self::Output {
         let Queue((ref mut head, ref mut tail)) = *self;
-        head.fmap(&mut f).push(f.call_mut((tail,)))
+        Queue((head.fmap(&mut f), f.call_mut((tail,))))
     }
 }
 
 
-impl<'a, F, H, T, O, U> Functor<F> for &'a Queue<(Queue<H>, T)>
-    where &'a Queue<H>: for<'b> Functor<&'b mut F, Output=Queue<U>>,
+impl<'a, F, H, T, O, U> Functor<F> for &'a Queue<(H, T)>
+    where &'a H: for<'b> Functor<&'b mut F, Output=U>,
           F: FnMut<(&'a T,), Output=O>,
 {
-    type Output = Queue<(Queue<U>, O)>;
+    type Output = Queue<(U, O)>;
     fn fmap(self, mut f: F) -> Self::Output {
         let Queue((ref head, ref tail)) = *self;
-        head.fmap(&mut f).push(f.call_mut((tail,)))
+        Queue((head.fmap(&mut f), f.call_mut((tail,))))
     }
 }

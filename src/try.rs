@@ -17,16 +17,16 @@ impl<E> Try<E> for List<()> {
 }
 
 
-impl<E, H, T, Z> Try<E> for List<(Result<H, E>, List<T>)>
-    where List<T>: Try<E, Ok=List<Z>>
+impl<E, H, T, Z> Try<E> for List<(Result<H, E>, T)>
+    where T: Try<E, Ok=Z>
 {
-    type Ok = List<(H, List<Z>)>;
+    type Ok = List<(H, Z)>;
 
-    fn try(self) -> Result<List<(H, List<Z>)>, E> {
+    fn try(self) -> Result<List<(H, Z)>, E> {
         let List((head, tail)) = self;
         let head = head?;
         let tail = tail.try()?;
-        Ok(tail.push(head))
+        Ok(List((head, tail)))
     }
 }
 
@@ -39,15 +39,15 @@ impl<E> Try<E> for Queue<()> {
 }
 
 
-impl<E, H, T, Z> Try<E> for Queue<(Queue<H>, Result<T, E>)>
-    where Queue<H>: Try<E, Ok=Queue<Z>>
+impl<E, H, T, Z> Try<E> for Queue<(H, Result<T, E>)>
+    where H: Try<E, Ok=Z>
 {
-    type Ok = Queue<(Queue<Z>, T)>;
+    type Ok = Queue<(Z, T)>;
 
-    fn try(self) -> Result<Queue<(Queue<Z>, T)>, E> {
+    fn try(self) -> Result<Queue<(Z, T)>, E> {
         let Queue((head, tail)) = self;
         let head = head.try()?;
         let tail = tail?;
-        Ok(head.push(tail))
+        Ok(Queue((head, tail)))
     }
 }

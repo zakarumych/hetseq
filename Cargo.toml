@@ -6,5 +6,10 @@ description = "Defines traits and types to work with heterogenous sequences"
 license = "Apache-2.0/MIT"
 repository = "https://github.com/omni-viral/hetseq"
 
+[dependencies.rayon]
+version = "*"
+optional = true
+
 [features]
 nightly = []
+par_iter = ["rayon"]

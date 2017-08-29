@@ -17,16 +17,16 @@ impl Zip<List<()>> for List<()> {
     }
 }
 
-impl<LH, LT, RH, RT, ZT> Zip<List<(RH, List<RT>)>> for List<(LH, List<LT>)>
-    where List<LT>: Zip<List<RT>, Zipped = List<ZT>>
+impl<LH, LT, RH, RT, ZT> Zip<List<(RH, RT)>> for List<(LH, LT)>
+    where LT: Zip<RT, Zipped = ZT>
 {
-    type Zipped = List<((LH, RH), List<ZT>)>;
+    type Zipped = List<((LH, RH), ZT)>;
 
-    fn zip(self, right: List<(RH, List<RT>)>) -> Self::Zipped {
+    fn zip(self, right: List<(RH, RT)>) -> Self::Zipped {
         let List((l_head, l_tail)) = self;
         let List((r_head, r_tail)) = right;
 
-        l_tail.zip(r_tail).push((l_head, r_head))
+        List(((l_head, r_head), l_tail.zip(r_tail)))
     }
 }
 
@@ -38,15 +38,15 @@ impl Zip<Queue<()>> for Queue<()> {
     }
 }
 
-impl<LH, LT, RH, RT, ZH> Zip<Queue<(Queue<RH>, RT)>> for Queue<(Queue<LH>, LT)>
-    where Queue<LH>: Zip<Queue<RH>, Zipped = Queue<ZH>>
+impl<LH, LT, RH, RT, ZH> Zip<Queue<(RH, RT)>> for Queue<(LH, LT)>
+    where LH: Zip<RH, Zipped = ZH>
 {
-    type Zipped = Queue<(Queue<ZH>, (LT, RT))>;
+    type Zipped = Queue<(ZH, (LT, RT))>;
 
-    fn zip(self, right: Queue<(Queue<RH>, RT)>) -> Self::Zipped {
+    fn zip(self, right: Queue<(RH, RT)>) -> Self::Zipped {
         let Queue((l_head, l_tail)) = self;
         let Queue((r_head, r_tail)) = right;
 
-        l_head.zip(r_head).push((l_tail, r_tail))
+        Queue((l_head.zip(r_head), (l_tail, r_tail)))
     }
 }

@@ -1,5 +1,7 @@
 #![cfg_attr(feature="nightly", feature(unsize, fn_traits, unboxed_closures))]
 
+#[cfg(feature = "par_iter")]
+extern crate rayon;
 
 /// Convenient way to define heterogenous `List`
 #[macro_export]
@@ -117,6 +119,9 @@ mod num;
 mod try;
 mod queue;
 mod zip;
+
+#[cfg(feature = "par_iter")]
+mod par_iter;
 
 #[cfg(test)]
 mod tests;

@@ -49,22 +49,22 @@ pub trait IntoQueueImpl<L> {
     fn into_queue_impl(self, L) -> Self::Queue;
 }
 
-impl<H, T, L> IntoQueueImpl<Queue<L>> for List<(H, T)>
-    where T: IntoQueueImpl<Queue<(Queue<L>, H)>>
+impl<H, T, Q> IntoQueueImpl<Q> for List<(H, T)>
+    where T: IntoQueueImpl<Queue<(Q, H)>>
 {
     type Queue = T::Queue;
 
-    fn into_queue_impl(self, queue: Queue<L>) -> Self::Queue {
+    fn into_queue_impl(self, queue: Q) -> Self::Queue {
         let List((head, tail)) = self;
-        let queue = queue.push(head);
+        let queue = Queue((queue, head));
         tail.into_queue_impl(queue)
     }
 }
 
-impl<Q> IntoQueue for Q
-    where Q: IntoQueueImpl<Queue<()>>
+impl<L> IntoQueue for L
+    where L: IntoQueueImpl<Queue<()>>
 {
-    type Queue = <Q as IntoQueueImpl<Queue<()>>>::Queue;
+    type Queue = <L as IntoQueueImpl<Queue<()>>>::Queue;
     fn into_queue(self) -> Self::Queue {
         self.into_queue_impl(Queue::new())
     }

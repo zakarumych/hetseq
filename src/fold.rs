@@ -42,8 +42,8 @@ impl<I, F> Foldable<I, F> for Queue<()> {
     fn fold(self, init: I, _: F) -> I { init }
 }
 
-impl<I, F, H, T> Foldable<I, F> for List<(H, List<T>)>
-    where List<T>: Foldable<I, F>,
+impl<I, F, H, T> Foldable<I, F> for List<(H, T)>
+    where T: Foldable<I, F>,
           F: FnMut<(H, I), Output=I>
 {
     fn fold(self, init: I, mut f: F) -> I {
@@ -52,8 +52,8 @@ impl<I, F, H, T> Foldable<I, F> for List<(H, List<T>)>
     }
 }
 
-impl<I, F, H, T> Foldable<I, F> for Queue<(Queue<H>, T)>
-    where Queue<H>: for<'a> Foldable<I, &'a mut F>,
+impl<I, F, H, T> Foldable<I, F> for Queue<(H, T)>
+    where H: for<'a> Foldable<I, &'a mut F>,
           F: FnMut<(T, I), Output=I>
 {
     fn fold(self, init: I, mut f: F) -> I {

@@ -11,18 +11,18 @@ impl Length for List<()> {
     type Length = Z;
 }
 
-impl<H, T> Length for List<(H, List<T>)>
-    where List<T>: Length
+impl<H, T> Length for List<(H, T)>
+    where T: Length
 {
-    type Length = S<<List<T> as Length>::Length>;
+    type Length = S<<T as Length>::Length>;
 }
 
 impl Length for Queue<()> {
     type Length = Z;
 }
 
-impl<H, T> Length for Queue<(Queue<H>, T)>
-    where Queue<H>: Length
+impl<H, T> Length for Queue<(H, T)>
+    where H: Length
 {
-    type Length = S<<Queue<H> as Length>::Length>;
+    type Length = S<<H as Length>::Length>;
 }
