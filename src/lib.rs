@@ -3,6 +3,9 @@
 #[cfg(feature = "par_iter")]
 extern crate rayon;
 
+#[cfg(feature = "shred")]
+extern crate shred;
+
 /// Convenient way to define heterogenous `List`
 #[macro_export]
 macro_rules! hlist {
@@ -19,6 +22,17 @@ macro_rules! hlist {
 macro_rules! hqueue {
     ($($values:expr),*) => {
         Queue::new()$(.push($values))*
+    };
+}
+
+/// Convenient way to define heterogenous `Queue`
+#[macro_export]
+macro_rules! HQueue {
+    () => {
+        Queue<()>
+    };
+    ($($types:path),*, $last:path) => {
+        Queue<(HQueue![$($types),*], $last)>
     };
 }
 
@@ -122,6 +136,9 @@ mod zip;
 
 #[cfg(feature = "par_iter")]
 mod par_iter;
+
+#[cfg(feature = "shred")]
+mod system_data;
 
 #[cfg(test)]
 mod tests;
